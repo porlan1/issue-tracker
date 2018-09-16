@@ -1,0 +1,63 @@
+<html>
+    <head>
+        <style>
+            .padded-div {
+                padding: 10px;
+            }
+            .line {
+                width: 100%;
+                border-bottom: 1px solid black;
+                margin-top: 30px;
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Metric/Imperial Converter</h1>
+        <h2>Conversion types:</h2>
+        <ul>
+        <li>L   &harr;  GAL</li>
+        <li>KM  &harr;  MI</li>
+        <li>KG  &harr;  LBS</li>
+        </ul>
+        <h2>Example usage:</h2>
+        <div>/api/convert?input=4gal</div>
+        <div>/api/convert?input=1/2km</div>
+        <div>/api/convert?input=5.4/3lbs</div>
+        <div>
+            <div class="line"></div>
+            <h2>Interface:</h2>
+            <input type='text' id='text-input' placeholder="3.6mi"/>
+            <button style="display: inline-block;"
+            onClick="clickHandler()">
+                Convert
+            </button>
+            <div class = "padded-div" id='string-display'>
+            </div>
+            <div class = "padded-div" id = 'response'>
+            </div>
+        </div>
+    </body>
+    <script>
+        function clickHandler() {
+            let textInput = document.getElementById('text-input').value;
+            fetch(`/api/convert?input=${textInput}`).then(
+                res=>{
+                    return res.text();
+                }
+            ).then(res=>{
+                try {
+                    res = JSON.parse(res);
+                    document.getElementById('string-display').innerHTML = res.string;
+                    document.getElementById('response').innerHTML = JSON.stringify(res);
+                } catch {
+                    document.getElementById('string-display').innerHTML = res;
+                    document.getElementById('response').innerHTML = '';
+                }
+            }).catch(e=>{
+                document.getElementById('string-display').innerHTML = '';
+                document.getElementById('response').innerHTML = '';
+            });
+        }
+    </script>
+</html>
