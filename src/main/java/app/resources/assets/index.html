@@ -10,54 +10,96 @@
                 margin-top: 30px;
                 margin-bottom: 10px;
             }
+            input {
+                display: block;
+            }
         </style>
     </head>
     <body>
-        <h1>Metric/Imperial Converter</h1>
-        <h2>Conversion types:</h2>
-        <ul>
-        <li>L   &harr;  GAL</li>
-        <li>KM  &harr;  MI</li>
-        <li>KG  &harr;  LBS</li>
-        </ul>
-        <h2>Example usage:</h2>
-        <div>/api/convert?input=4gal</div>
-        <div>/api/convert?input=1/2km</div>
-        <div>/api/convert?input=5.4/3lbs</div>
+        <h1>Issue Tracker</h1>
+        
+        <h2>Example get usage:</h2>
+        <div>/api/issues/{project}</div>
+        <div>/api/issues/{project}?open=true&assigned_to=Joe</div>
+        <h2>Example return:</h2>
+        <div>[{"_id":"5871dda29faedc3491ff93bb","issue_title":"Fix error in posting data","issue_text":"When we post data it has an error.","created_on":"2017-01-08T06:35:14.240Z","updated_on":"2017-01-08T06:35:14.240Z","created_by":"Joe","assigned_to":"Joe","open":true,"status_text":"In QA"},...] </div>
         <div>
             <div class="line"></div>
-            <h2>Interface:</h2>
-            <input type='text' id='text-input' placeholder="3.6mi"/>
-            <button style="display: inline-block;"
-            onClick="clickHandler()">
-                Convert
-            </button>
-            <div class = "padded-div" id='string-display'>
-            </div>
+            <h2>API:</h2>
+            <h3>Create New Issue:</h3>
+            <form id='create-form'>
+                <input type='text' name="project" placeholder="*Project name" required/>
+                <input type='text' name='issue_title' placeholder="*Title" required/>
+                <textarea name='issue_text' placeholder = "*Text" required></textarea>
+                <input type='text' name='created_by' placeholder="*Created by" required/>
+                <input type='text' name='assigned_to' placeholder="(Opt) Assigned to"/>
+                <input type='text' name='status_text' placeholder="(Opt) Status text"/>
+                <button onClick="submitNew()">Submit Issue</button>
+            </form>
+            <h3>Update Issue:</h3>
+            <form id = 'update-form'>
+                <input type='number' name='_id' placeholder="*_id" required/>
+                <input type='text' id='submit-project' name="project" placeholder="(Opt) Project name"/>
+                <input type='text' name='issue_title' placeholder="(Opt) Title"/>
+                <textarea name='text' placeholder = "(Opt) Text"></textarea>
+                <input type='text' name='issue_title' placeholder="(Opt) Title"/>
+                <input type='text' name='created_by' placeholder="(Opt) Created by"/>
+                <input type='text' name='assigned_to' placeholder="(Opt) Assigned to"/>
+                <input type='text' name='status_text' placeholder="(Opt) Status text"/>
+                <label style="display:block;">
+                <input type='checkbox' style="display:inline-block;">
+                Check to close issue
+                </label>
+                <button onClick="update()">Update Issue</button>
+            </form>
+            <h3>Delete An Issue:</h3>
+            <form id = 'remove-form'>
+                <input type='number' name='_id' id = 'remove-id' placeholder="*_id" required/>
+                <button onClick="remove();">Delete Issue</button>
+            </form>
             <div class = "padded-div" id = 'response'>
             </div>
         </div>
     </body>
     <script>
-        function clickHandler() {
-            let textInput = document.getElementById('text-input').value;
-            fetch(`/api/convert?input=${textInput}`).then(
+        function create() {
+            let submitTo = document.getElementById('submit-project').value;
+            let formElement = document.getElementById('create-form');
+            const data = new URLSearchParams(new FormData(formElement));
+            fetch(`/api/issues/${submitTo}`, {method:'POST', body: data}).then(
+                res=>{
+                    return res.json();
+                }
+            ).then(res=>{
+                document.getElementById('string-display').innerHTML = JSON.stringify(res);
+            })
+        }
+
+        function update() {
+            let submitTo = document.getElementById('submit-project').value;
+            let formElement = document.getElementById('update-form');
+            const data = new URLSearchParams(new FormData(formElement));
+            fetch('/api/issues/a/', {method:'PUT', body: data}).then(
+                res=>{
+                    return res.json();
+                }
+            ).then(res=>{
+                document.getElementById('string-display').innerHTML = JSON.stringify(res);
+            })
+        }
+
+        function remove() {
+            let formElement = document.getElementById('remove-form');
+            let _id = document.getElementById('remove-id').value;
+            //const data = new FormData(formElement);
+            //console.log(data)
+            fetch(`/api/issues/a?_id=${_id}`, {method:'DELETE'}).then(
                 res=>{
                     return res.text();
                 }
             ).then(res=>{
-                try {
-                    res = JSON.parse(res);
-                    document.getElementById('string-display').innerHTML = res.string;
-                    document.getElementById('response').innerHTML = JSON.stringify(res);
-                } catch {
-                    document.getElementById('string-display').innerHTML = res;
-                    document.getElementById('response').innerHTML = '';
-                }
-            }).catch(e=>{
-                document.getElementById('string-display').innerHTML = '';
-                document.getElementById('response').innerHTML = '';
-            });
+                document.getElementById('string-display').innerHTML = res;
+            })
         }
     </script>
 </html>
