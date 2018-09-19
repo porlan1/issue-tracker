@@ -13,92 +13,166 @@
             input {
                 display: block;
             }
+            #response {
+                background-color: black;
+                width: 100%;
+                color: greenyellow;
+                min-height: 100px;
+            }
+            .api-call {
+                display: inline-block;
+                vertical-align: top;
+                border: 1px solid black;
+                border-radius: 5px;
+                min-width: 200px;
+                padding: 10px;
+            }
+            h3 {
+                margin-top: 0px;
+                text-align:center;
+            }
+            button {
+                background-color: green;
+                color:white;
+            }
         </style>
     </head>
     <body>
-        <h1>Issue Tracker</h1>
-        
-        <h2>Example get usage:</h2>
-        <div>/api/issues/{project}</div>
-        <div>/api/issues/{project}?open=true&assigned_to=Joe</div>
-        <h2>Example return:</h2>
-        <div>[{"_id":"5871dda29faedc3491ff93bb","issue_title":"Fix error in posting data","issue_text":"When we post data it has an error.","created_on":"2017-01-08T06:35:14.240Z","updated_on":"2017-01-08T06:35:14.240Z","created_by":"Joe","assigned_to":"Joe","open":true,"status_text":"In QA"},...] </div>
-        <div>
+            <h2 style="text-align:center;">Issue Tracker API</h2>
             <div class="line"></div>
-            <h2>API:</h2>
-            <h3>Create New Issue:</h3>
+            <div class='api-call'>
+            <h3>Create Issue</h3>
             <form id='create-form'>
-                <input type='text' name="project" placeholder="*Project name" required/>
-                <input type='text' name='issue_title' placeholder="*Title" required/>
-                <textarea name='issue_text' placeholder = "*Text" required></textarea>
-                <input type='text' name='created_by' placeholder="*Created by" required/>
-                <input type='text' name='assigned_to' placeholder="(Opt) Assigned to"/>
-                <input type='text' name='status_text' placeholder="(Opt) Status text"/>
-                <button onClick="submitNew()">Submit Issue</button>
+                <input id="create-project" type='text' name="project" placeholder="*Project name" required/>
+                <input id="create-issue-title" type='text' name='issue_title' placeholder="*Title" required/>
+                <textarea id="create-issue-text" name='issue_text' placeholder = "*Text" required></textarea>
+                <input id="create-created-by" type='text' name='created_by' placeholder="*Created by" required/>
+                <input id="create-assigned-to" type='text' name='assigned_to' placeholder="(Opt) Assigned to"/>
+                <input id="create-status-text" type='text' name='status_text' placeholder="(Opt) Status text"/>
+                <button type="button" onClick="create();">CREATE</button>
             </form>
-            <h3>Update Issue:</h3>
+            </div>
+            <div class='api-call'>
+            <h3>Update Issue</h3>
             <form id = 'update-form'>
-                <input type='number' name='_id' placeholder="*_id" required/>
-                <input type='text' id='submit-project' name="project" placeholder="(Opt) Project name"/>
-                <input type='text' name='issue_title' placeholder="(Opt) Title"/>
-                <textarea name='text' placeholder = "(Opt) Text"></textarea>
-                <input type='text' name='issue_title' placeholder="(Opt) Title"/>
-                <input type='text' name='created_by' placeholder="(Opt) Created by"/>
-                <input type='text' name='assigned_to' placeholder="(Opt) Assigned to"/>
-                <input type='text' name='status_text' placeholder="(Opt) Status text"/>
+                <input type='number' id='update-_id' name='_id' placeholder="*_id" required/>
+                <input type='text' id='update-project' name="project" placeholder="(Opt) Project name"/>
+                <input type='text' id='update-issue-title' name='issue_title' placeholder="(Opt) Title"/>
+                <textarea name='text' id='update-issue-text' placeholder = "(Opt) Text"></textarea>
+                <input type='text' id='update-created-by' name='created_by' placeholder="(Opt) Created by"/>
+                <input type='text' id='update-assigned-to' name='assigned_to' placeholder="(Opt) Assigned to"/>
+                <input type='text' id='update-status-text' name='status_text' placeholder="(Opt) Status text"/>
                 <label style="display:block;">
-                <input type='checkbox' style="display:inline-block;">
+                <input id='update-open' type='checkbox' style="display:inline-block;">
                 Check to close issue
                 </label>
-                <button onClick="update()">Update Issue</button>
+                <button type="button" onClick="update();">UPDATE</button>
             </form>
-            <h3>Delete An Issue:</h3>
+            </div>
+            <div class='api-call'>
+            <h3>Delete Issue</h3>
             <form id = 'remove-form'>
                 <input type='number' name='_id' id = 'remove-id' placeholder="*_id" required/>
-                <button onClick="remove();">Delete Issue</button>
+                <button style="background-color:red;" type="button" onClick="remove();">DELETE</button>
             </form>
+            </div>
+            <div class = 'api-call'>
+            <h3>Get Issues</h3>
+            <form id = 'get-form'>
+                <input type='number' id='get-_id' name='_id' placeholder="(Opt) _id"/>
+                <input type='text' id='get-project' name="project" placeholder="(Opt) Project name"/>
+                <input type='text' id='get-issue-title' name='issue_title' placeholder="(Opt) Title"/>
+                <textarea name='text' id='get-issue-text' placeholder = "(Opt) Text"></textarea>
+                <input type='text' id='get-created-by' name='created_by' placeholder="(Opt) Created by"/>
+                <input type='text' id='get-assigned-to' name='assigned_to' placeholder="(Opt) Assigned to"/>
+                <input type='text' id='get-status-text' name='status_text' placeholder="(Opt) Status text"/>
+                <label style="display:block;">
+                    Status
+                <select id='get-open'>
+                    <option value = 'all'>ALL</option>
+                    <option value = 'true'>OPEN</option>
+                    <option value = 'false'>CLOSED</option>
+                </select>
+                </label>
+                <button type="button" onClick="get();">GET</button>
+            </form>
+            </div>
+            <div class="line"></div>
+            <h2>Output:</h2>
             <div class = "padded-div" id = 'response'>
             </div>
         </div>
     </body>
     <script>
         function create() {
-            let submitTo = document.getElementById('submit-project').value;
-            let formElement = document.getElementById('create-form');
-            const data = new URLSearchParams(new FormData(formElement));
-            fetch(`/api/issues/${submitTo}`, {method:'POST', body: data}).then(
+            let project = document.getElementById('create-project').value;
+            let issue_title = document.getElementById('create-issue-title').value;
+            let issue_text = document.getElementById('create-issue-text').value;
+            let created_by = document.getElementById('create-created-by').value;
+            let assigned_to = document.getElementById('create-assigned-to').value;
+            let status_text = document.getElementById('create-status-text').value;
+            fetch(`/api/issues/${project}?issue_title=${issue_title}&issue_text=${issue_text}&created_by=${created_by}&assigned_to=${assigned_to}&status_text=${status_text}`,
+            {method:'POST'}).then(
                 res=>{
                     return res.json();
                 }
             ).then(res=>{
-                document.getElementById('string-display').innerHTML = JSON.stringify(res);
+                document.getElementById('response').innerHTML = JSON.stringify(res);
             })
         }
 
         function update() {
-            let submitTo = document.getElementById('submit-project').value;
-            let formElement = document.getElementById('update-form');
-            const data = new URLSearchParams(new FormData(formElement));
-            fetch('/api/issues/a/', {method:'PUT', body: data}).then(
+            let project = document.getElementById('update-project').value;
+            project = !project? 'avknrvjknvwaeaemckjn': project;
+            let _id = document.getElementById('update-_id').value;
+            let issue_title = document.getElementById('update-issue-title').value;
+            let issue_text = document.getElementById('update-issue-text').value;
+            let created_by = document.getElementById('update-created-by').value;
+            let assigned_to = document.getElementById('update-assigned-to').value;
+            let status_text = document.getElementById('update-status-text').value;
+            let open = !document.getElementById('update-open').checked;
+            fetch(`/api/issues/${project}?_id=${_id}&issue_title=${issue_title}&issue_text=${issue_text}&created_by=${created_by}&assigned_to=${assigned_to}&status_text=${status_text}&open=${open}`,
+            {method:'PUT'}).then(
                 res=>{
-                    return res.json();
+                    return res.text();
                 }
             ).then(res=>{
-                document.getElementById('string-display').innerHTML = JSON.stringify(res);
+                document.getElementById('response').innerHTML = res;
             })
         }
 
         function remove() {
             let formElement = document.getElementById('remove-form');
             let _id = document.getElementById('remove-id').value;
-            //const data = new FormData(formElement);
-            //console.log(data)
             fetch(`/api/issues/a?_id=${_id}`, {method:'DELETE'}).then(
                 res=>{
                     return res.text();
                 }
             ).then(res=>{
-                document.getElementById('string-display').innerHTML = res;
+                document.getElementById('response').innerHTML = res;
+            })
+        }
+
+        function get() {
+            let project = document.getElementById('get-project').value;
+            project = !project? 'avknrvjknvwaeaemckjn': project;
+            let _id = document.getElementById('get-_id').value;
+            let issue_title = document.getElementById('get-issue-title').value;
+            let issue_text = document.getElementById('get-issue-text').value;
+            let created_by = document.getElementById('get-created-by').value;
+            let assigned_to = document.getElementById('get-assigned-to').value;
+            let status_text = document.getElementById('get-status-text').value;
+            let open = document.getElementById('get-open').value;
+            if (open === 'all') {
+                open = undefined;
+            } 
+            fetch(`/api/issues/${project}?_id=${_id}&issue_title=${issue_title}&issue_text=${issue_text}&created_by=${created_by}&assigned_to=${assigned_to}&status_text=${status_text}&open=${open}`)
+            .then(
+                res=>{
+                    return res.json();
+                }
+            ).then(res=>{
+                document.getElementById('response').innerHTML = JSON.stringify(res);
             })
         }
     </script>
