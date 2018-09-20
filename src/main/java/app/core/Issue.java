@@ -1,7 +1,6 @@
 package app.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 
 public class Issue {

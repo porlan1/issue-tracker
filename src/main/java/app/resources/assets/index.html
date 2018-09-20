@@ -34,29 +34,45 @@
             button {
                 background-color: green;
                 color:white;
+                cursor: pointer;
+            }
+            #global-project-name {
+                height:40px;
+                display:inline-block;
+                font-size: 20px;
+                text-align: center;
+                border-color: red;
+            }
+            button:disabled, #delete-button:disabled {
+                background-color:gray;
+                cursor: not-allowed;
+            }
+            #delete-button {
+                background-color: red;
             }
         </style>
     </head>
     <body>
             <h2 style="text-align:center;">Issue Tracker API</h2>
+            <div style="text-align: center;width: 100%;">
+                <input type = "text" id='global-project-name' placeholder="*Project Name"/>
+            </div>
             <div class="line"></div>
             <div class='api-call'>
             <h3>Create Issue</h3>
             <form id='create-form'>
-                <input id="create-project" type='text' name="project" placeholder="*Project name" required/>
                 <input id="create-issue-title" type='text' name='issue_title' placeholder="*Title" required/>
                 <textarea id="create-issue-text" name='issue_text' placeholder = "*Text" required></textarea>
                 <input id="create-created-by" type='text' name='created_by' placeholder="*Created by" required/>
                 <input id="create-assigned-to" type='text' name='assigned_to' placeholder="(Opt) Assigned to"/>
                 <input id="create-status-text" type='text' name='status_text' placeholder="(Opt) Status text"/>
-                <button type="button" onClick="create();">CREATE</button>
+                <button type="button" onClick="create();" disabled>CREATE</button>
             </form>
             </div>
             <div class='api-call'>
             <h3>Update Issue</h3>
             <form id = 'update-form'>
                 <input type='number' id='update-_id' name='_id' placeholder="*_id" required/>
-                <input type='text' id='update-project' name="project" placeholder="(Opt) Project name"/>
                 <input type='text' id='update-issue-title' name='issue_title' placeholder="(Opt) Title"/>
                 <textarea name='text' id='update-issue-text' placeholder = "(Opt) Text"></textarea>
                 <input type='text' id='update-created-by' name='created_by' placeholder="(Opt) Created by"/>
@@ -66,21 +82,20 @@
                 <input id='update-open' type='checkbox' style="display:inline-block;">
                 Check to close issue
                 </label>
-                <button type="button" onClick="update();">UPDATE</button>
+                <button type="button" onClick="update();" disabled>UPDATE</button>
             </form>
             </div>
             <div class='api-call'>
             <h3>Delete Issue</h3>
             <form id = 'remove-form'>
                 <input type='number' name='_id' id = 'remove-id' placeholder="*_id" required/>
-                <button style="background-color:red;" type="button" onClick="remove();">DELETE</button>
+                <button id="delete-button" type="button" onClick="remove();" disabled>DELETE</button>
             </form>
             </div>
             <div class = 'api-call'>
             <h3>Get Issues</h3>
             <form id = 'get-form'>
                 <input type='number' id='get-_id' name='_id' placeholder="(Opt) _id"/>
-                <input type='text' id='get-project' name="project" placeholder="(Opt) Project name"/>
                 <input type='text' id='get-issue-title' name='issue_title' placeholder="(Opt) Title"/>
                 <textarea name='text' id='get-issue-text' placeholder = "(Opt) Text"></textarea>
                 <input type='text' id='get-created-by' name='created_by' placeholder="(Opt) Created by"/>
@@ -94,7 +109,7 @@
                     <option value = 'false'>CLOSED</option>
                 </select>
                 </label>
-                <button type="button" onClick="get();">GET</button>
+                <button type="button" onClick="get();" disabled>GET</button>
             </form>
             </div>
             <div class="line"></div>
@@ -105,7 +120,7 @@
     </body>
     <script>
         function create() {
-            let project = document.getElementById('create-project').value;
+            let project = document.getElementById('global-project-name').value;
             let issue_title = document.getElementById('create-issue-title').value;
             let issue_text = document.getElementById('create-issue-text').value;
             let created_by = document.getElementById('create-created-by').value;
@@ -117,13 +132,12 @@
                     return res.json();
                 }
             ).then(res=>{
-                document.getElementById('response').innerHTML = JSON.stringify(res);
+                displayJSONResponse(res);
             })
         }
 
         function update() {
-            let project = document.getElementById('update-project').value;
-            project = !project? 'avknrvjknvwaeaemckjn': project;
+            let project = document.getElementById('global-project-name').value;
             let _id = document.getElementById('update-_id').value;
             let issue_title = document.getElementById('update-issue-title').value;
             let issue_text = document.getElementById('update-issue-text').value;
@@ -131,7 +145,7 @@
             let assigned_to = document.getElementById('update-assigned-to').value;
             let status_text = document.getElementById('update-status-text').value;
             let open = !document.getElementById('update-open').checked;
-            fetch(`/api/issues/${project}?_id=${_id}&issue_title=${issue_title}&issue_text=${issue_text}&created_by=${created_by}&assigned_to=${assigned_to}&status_text=${status_text}&open=${open}`,
+            fetch(`/api/issues/${project}?${_id?'&_id='+_id:''}${issue_title?'&issue_title='+issue_title:''}${issue_text?'&issue_text='+issue_text:''}${created_by?'&created_by='+created_by:''}${assigned_to?'&assigned_to='+assigned_to:''}${status_text?'&status_text='+status_text:''}&open=${open}`,
             {method:'PUT'}).then(
                 res=>{
                     return res.text();
@@ -142,9 +156,9 @@
         }
 
         function remove() {
-            let formElement = document.getElementById('remove-form');
+            let project = document.getElementById('global-project-name').value;
             let _id = document.getElementById('remove-id').value;
-            fetch(`/api/issues/a?_id=${_id}`, {method:'DELETE'}).then(
+            fetch(`/api/issues/${project}?_id=${_id}`, {method:'DELETE'}).then(
                 res=>{
                     return res.text();
                 }
@@ -154,8 +168,7 @@
         }
 
         function get() {
-            let project = document.getElementById('get-project').value;
-            project = !project? 'avknrvjknvwaeaemckjn': project;
+            let project = document.getElementById('global-project-name').value;
             let _id = document.getElementById('get-_id').value;
             let issue_title = document.getElementById('get-issue-title').value;
             let issue_text = document.getElementById('get-issue-text').value;
@@ -163,17 +176,53 @@
             let assigned_to = document.getElementById('get-assigned-to').value;
             let status_text = document.getElementById('get-status-text').value;
             let open = document.getElementById('get-open').value;
-            if (open === 'all') {
-                open = undefined;
-            } 
-            fetch(`/api/issues/${project}?_id=${_id}&issue_title=${issue_title}&issue_text=${issue_text}&created_by=${created_by}&assigned_to=${assigned_to}&status_text=${status_text}&open=${open}`)
+            open = open==='false'? false: (open === "true"? true: null);
+            fetch(`/api/issues/${project}?${_id?'&_id='+_id:''}${issue_title?'&issue_title='+issue_title:''}${issue_text?'&issue_text='+issue_text:''}${created_by?'&created_by='+created_by:''}${assigned_to?'&assigned_to='+assigned_to:''}${status_text?'&status_text='+status_text:''}${open!==null?'&open='+open:''}`)
             .then(
                 res=>{
                     return res.json();
                 }
             ).then(res=>{
-                document.getElementById('response').innerHTML = JSON.stringify(res);
+                displayJSONResponse(res);
             })
+        }
+        document.getElementById('global-project-name').onkeyup = function(e){
+            let buttons = document.getElementsByTagName('button');
+            if (this.value) {
+                this.style['border-color'] = 'inherit';
+                for (let b of buttons) {
+                    b.disabled = false;
+                }
+                return;
+            }
+            for (let b of buttons) {
+                b.disabled = true;
+            }
+            this.style['border-color'] = 'red';
+        };
+
+        function displayJSONResponse(res) {
+            let response = document.getElementById('response');
+            emptyElement(response);
+            while (response.firstChild) {
+                response.removeChild(response.firstChild);
+            }
+            for (el of res) {
+                for (let key in el) {
+                    div = document.createElement('div');
+                    div.innerHTML = `${key}: ${key.includes('_on') && el[key]? (new Date(el[key])).toLocaleString():el[key]}`;
+                    response.append(div);
+                }
+                let br = document.createElement('br');
+                response.append(br);
+            }
+            response
+        }
+
+        function emptyElement(element) {
+            while (element.firstChild) {
+                element.removeChild(element.firstChild);
+            }
         }
     </script>
 </html>
