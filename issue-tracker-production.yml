@@ -23,7 +23,7 @@ database:
   password: ${JDBC_DATABASE_PASSWORD}
 
   # the JDBC URL
-  url: ${JDBC_DATABASE_URL}
+  url: ${DATABASE_URL}
 
   # any properties specific to your JDBC driver:
   properties:
