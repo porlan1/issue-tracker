@@ -10,6 +10,7 @@ import io.dropwizard.jdbi3.JdbiFactory;
 import org.jdbi.v3.core.Jdbi;
 import app.jdbi.IssueDAO;
 import app.resources.api.IssueTrackerResource;
+import java.net.URISyntaxException;
 
 public class IssueTrackerApplication extends Application<IssueTrackerConfiguration> {
     public static void main(String[] args) throws Exception {
@@ -24,7 +25,7 @@ public class IssueTrackerApplication extends Application<IssueTrackerConfigurati
 
     @Override
     public void run(IssueTrackerConfiguration configuration,
-                Environment environment) {
+                Environment environment) throws URISyntaxException {
         final JdbiFactory factory = new JdbiFactory();
         final Jdbi jdbi = factory.build(environment, configuration.getDataSourceFactory(), "postgresql");
         final IssueDAO dao = jdbi.onDemand(IssueDAO.class);

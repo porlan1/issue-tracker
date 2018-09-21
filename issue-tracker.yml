@@ -17,14 +17,13 @@ database:
   driverClass: org.postgresql.Driver
 
   # the username
-  user: postgres
+  user: asdf
 
   # the password
-  password: elephantPassword
+  password: asdf
 
   # the JDBC URL
-  url: jdbc:postgresql://localhost/issue_tracker
-
+  url: asdf
   # any properties specific to your JDBC driver:
   properties:
     charSet: UTF-8

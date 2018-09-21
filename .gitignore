@@ -6,3 +6,6 @@ target/
 .vscode/
 out/
 src/main/main.iml
+
+.env
+Procfile.local
