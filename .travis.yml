@@ -1,0 +1,13 @@
+sudo: required 
+language: generic
+
+services: 
+  - docker 
+
+script: 
+  # build docker image
+  - docker build -t release .
+  - docker login -u _ -p "$HEROKU_API_KEY"  registry.heroku.com
+  - docker tag release registry.heroku.com/fcc-issue-tracker/web
+  - docker push registry.heroku.com/fcc-issue-tracker/web
+  - heroku container:release web -a fcc-issue-tracker
